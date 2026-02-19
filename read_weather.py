@@ -1,6 +1,5 @@
 import requests
-import os
-import sys
+import time
 from datetime import datetime
 from collections import defaultdict
 
@@ -8,81 +7,177 @@ from collections import defaultdict
 # CONFIGURATION
 # ==============================
 
-CITY = "Jaipur"   # Change city here
-API_KEY = "WEATHER_API"
-# to get api -> https://openweathermap.org/api
-
-if not API_KEY:
-    print("Set API key using:")
-    print('export WEATHER_API="your_api_key_here"')
-    sys.exit()
-
-# ==============================
-# API URLs
-# ==============================
+Weather_API_KEY = "API_KEY"   # Put your OpenWeather API key here
+CITY = "Jaipur"
 
 CURRENT_URL = "https://api.openweathermap.org/data/2.5/weather"
 FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast"
 
-params = {
-    "q": CITY,
-    "appid": API_KEY,
-    "units": "metric"
-}
 
-try:
-    # ==============================
-    # CURRENT WEATHER
-    # ==============================
-    current_response = requests.get(CURRENT_URL, params=params, timeout=10)
-    current_response.raise_for_status()
-    current_data = current_response.json()
+def get_weather_data():
+    """
+    Returns:
+    {
+        "temperature": float,
+        "humidity": int,
+        "description": str,
+        "rain_forecast": {
+        "YYYY-MM-DD": percentage,
+            ...
+        }
+    }
+    """
 
-    city_name = current_data["name"]
-    country = current_data["sys"]["country"]
+    params = {
+        "q": CITY,
+        "appid": Weather_API_KEY,
+        "units": "metric"
+    }
 
-    print("\n===================================")
-    print(f"📍 Location: {city_name}, {country}")
-    print("===================================")
-    print("Temperature:", current_data["main"]["temp"], "°C")
-    print("Feels Like:", current_data["main"]["feels_like"], "°C")
-    print("Humidity:", current_data["main"]["humidity"], "%")
-    print("Pressure:", current_data["main"]["pressure"], "hPa")
-    print("Weather:", current_data["weather"][0]["description"].title())
-    print("===================================\n")
+    try:
+        # ==============================
+        # CURRENT WEATHER
+        # ==============================
+        current_response = requests.get(CURRENT_URL, params=params, timeout=10)
+        current_response.raise_for_status()
+        current_data = current_response.json()
 
-    # ==============================
-    # FORECAST DATA (Rain Probability)
-    # ==============================
-    forecast_response = requests.get(FORECAST_URL, params=params, timeout=10)
-    forecast_response.raise_for_status()
-    forecast_data = forecast_response.json()
+        city_name = current_data["name"]
+        temperature = current_data["main"]["temp"]
+        humidity = current_data["main"]["humidity"]
+        description = current_data["weather"][0]["description"]
 
-    print("🌧 Rain Probability Forecast (Next 3 Days)\n")
+        # ==============================
+        # FORECAST (Next 3 Days Rain %)
+        # ==============================
+        forecast_response = requests.get(FORECAST_URL, params=params, timeout=10)
+        forecast_response.raise_for_status()
+        forecast_data = forecast_response.json()
 
-    daily_rain = defaultdict(list)
+        daily_rain = defaultdict(list)
 
-    for entry in forecast_data["list"]:
-        date = entry["dt_txt"].split(" ")[0]
-        pop = entry.get("pop", 0) * 100  # Convert to percentage
-        daily_rain[date].append(pop)
+        for entry in forecast_data["list"]:
+            date = entry["dt_txt"].split(" ")[0]
+            pop = entry.get("pop", 0) * 100
+            daily_rain[date].append(pop)
 
-    today = datetime.utcnow().date()
-    days_checked = 0
+        today = datetime.utcnow().date()
+        rain_forecast = {}
 
-    for date_str in sorted(daily_rain.keys()):
-        forecast_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        days_checked = 0
+        for date_str in sorted(daily_rain.keys()):
+            forecast_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            if forecast_date > today and days_checked < 3:
+                rain_forecast[str(forecast_date)] = round(max(daily_rain[date_str]), 0)
+                days_checked += 1
 
-        if forecast_date > today and days_checked < 3:
-            max_rain = max(daily_rain[date_str])
-            print(f"{forecast_date} → {max_rain:.0f}% chance of rain")
-            days_checked += 1
+        # ==============================
+        # FINAL STRUCTURED OUTPUT
+        # ==============================
 
-    print("\n===================================\n")
+        return {
+            "location":city_name,
+            "temperature": temperature,
+            "humidity": humidity,
+            "description": description,
+            "rain_forecast": rain_forecast
+        }
 
-except requests.exceptions.ConnectionError:
-    print("No internet connection.")
-except requests.exceptions.HTTPError as e:
-    print("HTTP Error:", e)
-except Exception as e:
-    print("Error:", e)
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
+
+
+
+
+
+# ------The below code is working fine with main function call------
+# import requests
+# import os
+# import sys
+# from datetime import datetime
+# from collections import defaultdict
+
+# # ==============================
+# # CONFIGURATION
+# # ==============================
+
+# CITY = "Jaipur"   # Change city here
+# API_KEY = "WEATHER_API"
+# # to get api -> https://openweathermap.org/api
+
+# if not API_KEY:
+#     print("Set API key using:")
+#     print('export WEATHER_API="your_api_key_here"')
+#     sys.exit()
+
+# # ==============================
+# # API URLs
+# # ==============================
+
+# CURRENT_URL = "https://api.openweathermap.org/data/2.5/weather"
+# FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast"
+
+# params = {
+#     "q": CITY,
+#     "appid": API_KEY,
+#     "units": "metric"
+# }
+
+# try:
+#     # ==============================
+#     # CURRENT WEATHER
+#     # ==============================
+#     current_response = requests.get(CURRENT_URL, params=params, timeout=10)
+#     current_response.raise_for_status()
+#     current_data = current_response.json()
+
+#     city_name = current_data["name"]
+#     country = current_data["sys"]["country"]
+
+#     print("\n===================================")
+#     print(f"📍 Location: {city_name}, {country}")
+#     print("===================================")
+#     print("Temperature:", current_data["main"]["temp"], "°C")
+#     print("Feels Like:", current_data["main"]["feels_like"], "°C")
+#     print("Humidity:", current_data["main"]["humidity"], "%")
+#     print("Pressure:", current_data["main"]["pressure"], "hPa")
+#     print("Weather:", current_data["weather"][0]["description"].title())
+#     print("===================================\n")
+
+#     # ==============================
+#     # FORECAST DATA (Rain Probability)
+#     # ==============================
+#     forecast_response = requests.get(FORECAST_URL, params=params, timeout=10)
+#     forecast_response.raise_for_status()
+#     forecast_data = forecast_response.json()
+
+#     print("🌧 Rain Probability Forecast (Next 3 Days)\n")
+
+#     daily_rain = defaultdict(list)
+
+#     for entry in forecast_data["list"]:
+#         date = entry["dt_txt"].split(" ")[0]
+#         pop = entry.get("pop", 0) * 100  # Convert to percentage
+#         daily_rain[date].append(pop)
+
+#     today = datetime.utcnow().date()
+#     days_checked = 0
+
+#     for date_str in sorted(daily_rain.keys()):
+#         forecast_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+#         if forecast_date > today and days_checked < 3:
+#             max_rain = max(daily_rain[date_str])
+#             print(f"{forecast_date} → {max_rain:.0f}% chance of rain")
+#             days_checked += 1
+
+#     print("\n===================================\n")
+
+# except requests.exceptions.ConnectionError:
+#     print("No internet connection.")
+# except requests.exceptions.HTTPError as e:
+#     print("HTTP Error:", e)
+# except Exception as e:
+#     print("Error:", e)
