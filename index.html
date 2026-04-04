@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real Time Farm Advisor</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>🌾 Real Time Farm Advisor</h1>
+
+<div class="container">
+
+    <!-- LEFT SIDE -->
+    <div class="left">
+
+        <h2>🌱 Sensor Data</h2>
+        <p>Soil Moisture: {{ data.soil_data.soil_moisture }} %</p>
+        <p>pH Level: {{ data.soil_data.ph }}</p>
+        <p>TDS: {{ data.soil_data.tds }} ppm</p>
+        <p>Nitrogen: {{ data.soil_data.nitrogen }}</p>
+        <p>Phosphorus: {{ data.soil_data.phosphorus }}</p>
+        <p>Potassium: {{ data.soil_data.potassium }}</p>
+
+        <h2>🌦 Weather Forecast (Next 3 Days)</h2>
+        <p>Temperature: {{ data.weather_data.temperature }} °C</p>
+        <p>Humidity: {{ data.weather_data.humidity }} %</p>
+        <p>Description: {{ data.weather_data.description }}</p>
+
+        <ul>
+        {% for date, rain in data.weather_data.rain_forecast.items() %}
+            <li>{{ date }} → {{ rain }}% rain chance</li>
+        {% endfor %}
+        </ul>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right">
+
+        <h2>🤖 Ask Farming Assistant</h2>
+
+        <textarea id="question" placeholder="Ask your farming question..."></textarea>
+        <button onclick="askAI()">Ask</button>
+
+        <div id="response"></div>
+
+    </div>
+
+</div>
+
+<script>
+function askAI() {
+    let question = document.getElementById("question").value;
+
+    fetch("/ask", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ question: question })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("response").innerText = data.answer;
+    });
+}
+</script>
+
+</body>
+</html>
