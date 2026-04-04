@@ -1,5 +1,5 @@
 from sensors import get_sensor_data
-from sensors import start_mqtt
+from sensors import start_lora
 from weather import get_weather_data
 
 
