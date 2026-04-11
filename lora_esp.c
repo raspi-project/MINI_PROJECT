@@ -18,13 +18,13 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define rst 14
 #define dio0 2
 
-// Define Sensor Pins (Matching the hardware table)
+// Define Sensor Pins
 #define SOIL_PIN 32
 #define LDR_PIN 33
 #define TDS_PIN 34
 #define DHTPIN 4
 
-// Define DHT Type (DHT11)
+// Define DHT Type
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -34,84 +34,61 @@ int counter = 0;
 // SENSOR FUNCTIONS
 // =====================
 
-// Actual Soil Moisture Sensor Reading
 int readSoilMoisture() {
   int rawValue = analogRead(SOIL_PIN);
-  // Map ADC value: 4095 (completely dry) to 1000 (completely wet) into 0-100%
   int moisturePercent = map(rawValue, 4095, 1000, 0, 100);
-  
-  // Constrain values between 0 and 100
   if(moisturePercent > 100) moisturePercent = 100;
   if(moisturePercent < 0) moisturePercent = 0;
-  
   return moisturePercent; 
 }
 
-// pH Sensor
-float readPH() {
-  return 6.5;  // Dummy value
-}
-
-// NPK Sensor
-String readNPK() {
-  int nitrogen = 40;
-  int phosphorus = 25;
-  int potassium = 30;
-
-  return String(nitrogen) + "," + 
-         String(phosphorus) + "," + 
-         String(potassium);
-}
-
-// Actual LDR (Sunlight Intensity) Reading
 int readLDR() {
   int rawValue = analogRead(LDR_PIN);
-  // Map ADC value: 0 (dark) to 4095 (bright) into 0-100%
   int lightPercent = map(rawValue, 0, 4095, 0, 100);
   return lightPercent;
 }
 
-// Actual TDS Sensor Reading
 int readTDS() {
   int rawValue = analogRead(TDS_PIN);
-  // Basic conversion: Map ADC value 0-4095 roughly to 0-1000 ppm
   int tdsValue = map(rawValue, 0, 4095, 0, 1000); 
   return tdsValue;
 }
 
-// DHT11 Temperature Reading
 float readTemperature() {
   float temp = dht.readTemperature();
-  // Check if any reads failed and return 0.0
-  if (isnan(temp)) {
-    return 0.0; 
-  }
+  if (isnan(temp)) return 0.0; 
   return temp;
 }
 
-// DHT11 Humidity Reading
 float readHumidity() {
   float hum = dht.readHumidity();
-  // Check if any reads failed and return 0.0
-  if (isnan(hum)) {
-    return 0.0; 
-  }
+  if (isnan(hum)) return 0.0; 
   return hum;
 }
 
+// pH Sensor (Constant)
+float readPH() {
+  return 6.5;  
+}
+
+// NPK Sensor (Constant)
+String readNPK() {
+  int nitrogen = 40;
+  int phosphorus = 25;
+  int potassium = 30;
+  return String(nitrogen) + "," + String(phosphorus) + "," + String(potassium);
+}
+
 void setup() {
-  // Initialize Serial Monitor
   Serial.begin(115200);
   while (!Serial);
   Serial.println("LoRa Sender Started");
 
-  // Initialize OLED Display (I2C address is usually 0x3C)
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
     Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever if OLED fails
+    for(;;); 
   }
   
-  // Show welcome screen on OLED
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
@@ -121,13 +98,9 @@ void setup() {
   display.display();
   delay(2000);
 
-  // Initialize DHT sensor
   dht.begin();
-
-  // Setup LoRa transceiver module
   LoRa.setPins(ss, rst, dio0);
   
-  // Set to 433 MHz to match receiver
   while (!LoRa.begin(433E6)) {
     Serial.println("Starting LoRa failed!");
     display.clearDisplay();
@@ -137,15 +110,12 @@ void setup() {
     delay(500);
   }
   
-  // Change sync word to match the receiver
   LoRa.setSyncWord(0xF3);
   Serial.println("LoRa Initializing OK!");
 }
 
 void loop() {
-  // =====================
-  // Read Sensor Values
-  // =====================
+  // Read all sensors
   int soil = readSoilMoisture();
   int ldr = readLDR();
   int tds = readTDS();
@@ -154,68 +124,137 @@ void loop() {
   float ph = readPH();
   String npk = readNPK();
 
-  // =====================
-  // Display on Serial Monitor
-  // =====================
+  // Print to Serial
   Serial.println("\n--- Sensor Readings ---");
   Serial.print("Soil Moisture : "); Serial.print(soil); Serial.println(" %");
   Serial.print("Sunlight (LDR): "); Serial.print(ldr); Serial.println(" %");
   Serial.print("Water TDS     : "); Serial.print(tds); Serial.println(" ppm");
   Serial.print("Temperature   : "); Serial.print(temp); Serial.println(" C");
   Serial.print("Humidity      : "); Serial.print(hum); Serial.println(" %");
+  //Serial.print("pH Level      : "); Serial.println(ph);
+  //Serial.print("NPK Values    : "); Serial.println(npk);
   Serial.println("-----------------------");
 
-  // =====================
-  // Display on OLED
-  // =====================
+  // Print to OLED
   display.clearDisplay();
   display.setCursor(0, 0);
-  
   display.println("--- Farm Advisor ---");
   
-  // Print Soil and LDR on same line to save space
   display.print("Soil:"); display.print(soil); display.print("% ");
   display.print("LDR:"); display.print(ldr); display.println("%");
   
-  // Print TDS
   display.print("TDS: "); display.print(tds); display.println(" ppm");
   
-  // Print Temp and Hum
   display.print("Temp: "); display.print(temp, 1); display.println(" C");
-  display.print("Hum:  "); display.print(hum, 1); display.println(" %");
+  display.print("Hum:  "); display.print(hum, 1); display.print("% ");
+  //display.print("pH:"); display.println(ph, 1);
   
-  // Print Packet Counter
-  display.println("");
-  display.print("Sent Pkts: "); display.print(counter);
-  
+  display.print("Pkts: "); display.print(counter);
   display.display();
 
-  // =====================
   // Send via LoRa
-  // =====================
-  // Combine into a single, highly efficient comma-separated payload
-  // Format: counter,soil(%),ldr(%),tds(ppm),temp(C),hum(%)
+  // Format: counter, soil, ldr, tds, temp, hum, ph, N, P, K
   String payload = String(counter) + "," + 
                    String(soil) + "," + 
                    String(ldr) + "," + 
                    String(tds) + "," + 
                    String(temp) + "," + 
-                   String(hum)+ "," + 
-                    npk+"," String(ph);
+                   String(hum) + "," + 
+                   String(ph) + "," + 
+                   npk;
 
   Serial.print("Sending LoRa Packet: ");
   Serial.println(payload);
 
-  // Send LoRa packet to receiver
   LoRa.beginPacket();
   LoRa.print(payload); 
   LoRa.endPacket();
 
   counter++;
-  
-  // Wait 5 seconds before sending the next packet to protect the module
-  delay(5000);  
+  delay(3000);  
 }
+
+/*
+this below code is for reading PH and NPK values from sensor 
+#include <ModbusMaster.h>
+
+// --- Pin Definitions ---
+#define MAX485_RX      16  // Connect to RO of MAX485
+#define MAX485_TX      17  // Connect to DI of MAX485
+#define MAX485_RE_DE   4   // Connect to RE & DE of MAX485
+#define PH_PIN         34  // Analog pin for pH sensor (GPIO 34)
+
+// --- Constants ---
+const float voltage_ref = 3.3; // ESP32 logic voltage
+const int adc_resolution = 4095;
+
+ModbusMaster node;
+
+// Callback for RS485 flow control
+void preTransmission() {
+  digitalWrite(MAX485_RE_DE, HIGH);
+}
+
+void postTransmission() {
+  digitalWrite(MAX485_RE_DE, LOW);
+}
+
+void setup() {
+  Serial.begin(115200);
+  
+  // RS485 setup (Usually 9600 baud for NPK sensors)
+  Serial2.begin(9600, SERIAL_8N1, MAX485_RX, MAX485_TX);
+  
+  pinMode(MAX485_RE_DE, OUTPUT);
+  digitalWrite(MAX485_RE_DE, LOW);
+
+  node.begin(1, Serial2); // Slave ID 1
+  node.preTransmission(preTransmission);
+  node.postTransmission(postTransmission);
+
+  Serial.println("System Initialized. Reading Sensors...");
+}
+
+void loop() {
+  readNPK();
+  readPH();
+  Serial.println("-----------------------");
+  delay(3000);
+}
+
+void readNPK() {
+  uint8_t result;
+  // NPK sensors often store N, P, K in registers starting at 0x001E
+  // Note: Check your specific sensor manual for the register address!
+  result = node.readHoldingRegisters(0x001E, 3);
+
+  if (result == node.ku8MBSuccess) {
+    uint16_t n = node.getResponseBuffer(0);
+    uint16_t p = node.getResponseBuffer(1);
+    uint16_t k = node.getResponseBuffer(2);
+
+    Serial.print("Nitrogen (N): "); Serial.print(n); Serial.println(" mg/kg");
+    Serial.print("Phosphorus (P): "); Serial.print(p); Serial.println(" mg/kg");
+    Serial.print("Potassium (K): "); Serial.print(k); Serial.println(" mg/kg");
+  } else {
+    Serial.print("Modbus Error: "); Serial.println(result, HEX);
+  }
+}
+
+void readPH() {
+  int adcValue = analogRead(PH_PIN);
+  float voltage = (adcValue * voltage_ref) / adc_resolution;
+  
+  // Simple linear calibration: pH = 7 + ((V_neutral - V_actual) / slope)
+  // You MUST calibrate these values for your specific sensor.
+  float phValue = 3.5 * voltage; // Placeholder conversion logic
+
+  Serial.print("Analog Voltage: "); Serial.print(voltage);
+  Serial.print(" | pH Value: "); Serial.println(phValue);
+}
+*/
+
+
 
 
 /*
