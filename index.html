@@ -10,20 +10,22 @@
 
 <div class="container">
 
-    <!-- LEFT SIDE -->
     <div class="left">
 
-        <h2>🌱 Sensor Data</h2>
-        <p>Soil Moisture: {{ data.soil_data.soil_moisture }} %</p>
-        <p>pH Level: {{ data.soil_data.ph }}</p>
-        <p>TDS: {{ data.soil_data.tds }} ppm</p>
-        <p>Nitrogen: {{ data.soil_data.nitrogen }}</p>
-        <p>Phosphorus: {{ data.soil_data.phosphorus }}</p>
-        <p>Potassium: {{ data.soil_data.potassium }}</p>
+        <h2>🌱 Local Sensor Data (Field)</h2>
+        <p>Soil Moisture: {{ data.local_sensor_data.soil_moisture }} %</p>
+        <p>Sunlight (LDR): {{ data.local_sensor_data.sunlight_ldr }} %</p>
+        <p>Water TDS: {{ data.local_sensor_data.water_tds }} ppm</p>
+        <p>Field Temp: {{ data.local_sensor_data.local_temperature }} °C</p>
+        <p>Field Humidity: {{ data.local_sensor_data.local_humidity }} %</p>
+        <p>pH Level: {{ data.local_sensor_data.ph }}</p>
+        <p>Nitrogen: {{ data.local_sensor_data.nitrogen }}</p>
+        <p>Phosphorus: {{ data.local_sensor_data.phosphorus }}</p>
+        <p>Potassium: {{ data.local_sensor_data.potassium }}</p>
 
-        <h2>🌦 Weather Forecast (Next 3 Days)</h2>
-        <p>Temperature: {{ data.weather_data.temperature }} °C</p>
-        <p>Humidity: {{ data.weather_data.humidity }} %</p>
+        <h2>🌦 Weather Forecast (Internet)</h2>
+        <p>City Temp: {{ data.weather_data.temperature }} °C</p>
+        <p>City Humidity: {{ data.weather_data.humidity }} %</p>
         <p>Description: {{ data.weather_data.description }}</p>
 
         <ul>
@@ -34,7 +36,6 @@
 
     </div>
 
-    <!-- RIGHT SIDE -->
     <div class="right">
 
         <h2>🤖 Ask Farming Assistant</h2>
@@ -68,3 +69,76 @@ function askAI() {
 
 </body>
 </html>
+
+<!-- This code Is Working Fine without LDR and DHT11  -->
+<!--
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real Time Farm Advisor</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>🌾 Real Time Farm Advisor</h1>
+
+<div class="container">
+
+    <div class="left">
+
+        <h2>🌱 Sensor Data</h2>
+        <p>Soil Moisture: {{ data.soil_data.soil_moisture }} %</p>
+        <p>pH Level: {{ data.soil_data.ph }}</p>
+        <p>TDS: {{ data.soil_data.tds }} ppm</p>
+        <p>Nitrogen: {{ data.soil_data.nitrogen }}</p>
+        <p>Phosphorus: {{ data.soil_data.phosphorus }}</p>
+        <p>Potassium: {{ data.soil_data.potassium }}</p>
+
+        <h2>🌦 Weather Forecast (Next 3 Days)</h2>
+        <p>Temperature: {{ data.weather_data.temperature }} °C</p>
+        <p>Humidity: {{ data.weather_data.humidity }} %</p>
+        <p>Description: {{ data.weather_data.description }}</p>
+
+        <ul>
+        {% for date, rain in data.weather_data.rain_forecast.items() %}
+            <li>{{ date }} → {{ rain }}% rain chance</li>
+        {% endfor %}
+        </ul>
+
+    </div>
+
+
+    <div class="right">
+
+        <h2>🤖 Ask Farming Assistant</h2>
+
+        <textarea id="question" placeholder="Ask your farming question..."></textarea>
+        <button onclick="askAI()">Ask</button>
+
+        <div id="response"></div>
+
+    </div>
+
+</div>
+
+<script>
+function askAI() {
+    let question = document.getElementById("question").value;
+
+    fetch("/ask", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ question: question })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("response").innerText = data.answer;
+    });
+}
+</script>
+
+</body>
+</html>
+-->
