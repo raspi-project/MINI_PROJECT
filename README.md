@@ -45,8 +45,7 @@ The system is divided into two distinct nodes:
 ### ESP32 Field Node Connections
 | Component | Pin Name | ESP32 GPIO |
 | :--- | :--- | :--- |
-| **LoRa SX1278** | 
-| | NSS / CS | GPIO 5 |
+| **LoRa SX1278** | NSS / CS | GPIO 5 |
 | | RST | GPIO 14 |
 | | DIO0 | GPIO 2 |
 | | MOSI | GPIO 23 |
@@ -54,11 +53,25 @@ The system is divided into two distinct nodes:
 | | SCK | GPIO 18 |
 | **OLED (I2C)** | SDA | GPIO 21 |
 | | SCL | GPIO 22 |
-| **Sensors** | 
-| |Soil Moisture (A0) | GPIO 32 |
+| **Sensors** | Soil Moisture (A0) | GPIO 32 |
 | | LDR Sunlight (A0) | GPIO 33 |
 | | TDS Meter (A0) | GPIO 34 |
 | | DHT11 (Data) | GPIO 4 |
+
+### Raspberry Pi Server Connections (LoRa Receiver)
+| LoRa SX1278 Pin | Raspberry Pi Pin |
+| :--- | :--- |
+| **VCC** | [cite_start]3.3V [cite: 173, 174] |
+| **GND** | [cite_start]Ground [cite: 178, 179] |
+| **MOSI** | [cite_start]GPIO 10 [cite: 180, 181] |
+| **MISO** | [cite_start]GPIO 9 [cite: 185, 186] |
+| **SCK** | [cite_start]GPIO 11 [cite: 190, 191] |
+| **NSS / Enable** | [cite_start]GPIO 8 [cite: 192, 193] |
+| **DIO0** | [cite_start]GPIO 4 [cite: 196, 198] |
+| **DIO1** | [cite_start]GPIO 17 [cite: 201, 202] |
+| **DIO2** | [cite_start]GPIO 18 [cite: 203, 204] |
+| **DIO3** | [cite_start]GPIO 27 [cite: 208, 209] |
+| **RST** | [cite_start]GPIO 22 [cite: 212, 213] |
 
 *(Note: All LoRa and OLED VCC pins are connected to 3.3V, NOT 5V).*
 
@@ -112,4 +125,4 @@ Step 4: Run the System
 
 * Solar Power Integration: Adding an MPPT solar charge controller to make the field node 100% self-sustaining.
 
-Regional Languages: Upgrading the AI prompt to converse in local regional languages for accessibility.
+* Regional Languages: Upgrading the AI prompt to converse in local regional languages for accessibility.
