@@ -61,17 +61,17 @@ The system is divided into two distinct nodes:
 ### Raspberry Pi Server Connections (LoRa Receiver)
 | LoRa SX1278 Pin | Raspberry Pi Pin |
 | :--- | :--- |
-| **VCC** | [cite_start]3.3V [cite: 173, 174] |
-| **GND** | [cite_start]Ground [cite: 178, 179] |
-| **MOSI** | [cite_start]GPIO 10 [cite: 180, 181] |
-| **MISO** | [cite_start]GPIO 9 [cite: 185, 186] |
-| **SCK** | [cite_start]GPIO 11 [cite: 190, 191] |
-| **NSS / Enable** | [cite_start]GPIO 8 [cite: 192, 193] |
-| **DIO0** | [cite_start]GPIO 4 [cite: 196, 198] |
-| **DIO1** | [cite_start]GPIO 17 [cite: 201, 202] |
-| **DIO2** | [cite_start]GPIO 18 [cite: 203, 204] |
-| **DIO3** | [cite_start]GPIO 27 [cite: 208, 209] |
-| **RST** | [cite_start]GPIO 22 [cite: 212, 213] |
+| **VCC** | 3.3V |
+| **GND** | Ground |
+| **MOSI** | GPIO 10 |
+| **MISO** | GPIO 9 |
+| **SCK** | GPIO 11  |
+| **NSS / Enable** | GPIO 8 |
+| **DIO0** | GPIO 4 |
+| **DIO1** | GPIO 17 |
+| **DIO2** | GPIO 18 |
+| **DIO3** | GPIO 27 |
+| **RST** | GPIO 22 |
 
 *(Note: All LoRa and OLED VCC pins are connected to 3.3V, NOT 5V).*
 
