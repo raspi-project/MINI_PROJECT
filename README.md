@@ -81,36 +81,35 @@ The system is divided into two distinct nodes:
    git clone [https://github.com/YourUsername/Real-Time-Farm-Advisor.git](https://github.com/YourUsername/Real-Time-Farm-Advisor.git)
    cd Real-Time-Farm-Advisor
 3. Install the required Python dependencies:
-Bash
-pip install flask openai spidev RPi.GPIO
+   ```bash
+   pip install flask openai spidev RPi.GPIO
+
 4. Note: You will also need the pyLoRa (SX127x) library configured for Python 3.
 
 Step 3: API Configuration
 1. Open the backend Python scripts (app.py or weather.py).
 
 2. Replace the placeholder API keys with your actual keys:
-
-OPENAI_API_KEY = "your_openai_key_here"
-
-WEATHER_API_KEY = "your_weather_api_key_here"
+   * OPENAI_API_KEY = "your_openai_key_here"
+   * WEATHER_API_KEY = "your_weather_api_key_here"
 
 Step 4: Run the System
 1. Power up the ESP32 via a battery or power bank. You should see the OLED display initialize and start showing sensor values.
 
 2. Run the main Flask application on the Raspberry Pi:
-
-Bash
-python3 app.py
+   ```bash
+   python3 app.py
 3. Open a web browser on any device connected to the same Wi-Fi network and navigate to:
-http://<Raspberry_Pi_IP_Address>:5000
+   ```bash
+   http://<Raspberry_Pi_IP_Address>:5000
 
-🔮 Future Scope
-Automated Actuation: Adding relays to the ESP32 node to allow the AI to automatically switch water pumps ON/OFF.
+## 🔮 Future Scope
+* Automated Actuation: Adding relays to the ESP32 node to allow the AI to automatically switch water pumps ON/OFF.
 
-Voice-Enabled Audio Advisory System: To further enhance accessibility and user experience, an integrated audio output module
+* Voice-Enabled Audio Advisory System: To further enhance accessibility and user experience, an integrated audio output module
 
-Computer Vision: Integrating a Pi Camera for early crop disease detection using CNNs.
+* Computer Vision: Integrating a Pi Camera for early crop disease detection using CNNs.
 
-Solar Power Integration: Adding an MPPT solar charge controller to make the field node 100% self-sustaining.
+* Solar Power Integration: Adding an MPPT solar charge controller to make the field node 100% self-sustaining.
 
 Regional Languages: Upgrading the AI prompt to converse in local regional languages for accessibility.
